@@ -1,5 +1,12 @@
 package com.java.demo;
 
+import com.java.demo.basicauth.AppAuthenticator;
+import com.java.demo.basicauth.AppAuthorizer;
+import com.java.demo.basicauth.User;
+import com.java.demo.controller.EmployeeRESTController;
+import com.java.demo.controller.RESTClientController;
+import com.java.demo.healthcheck.AppHealthCheck;
+import com.java.demo.healthcheck.HealthCheckController;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.auth.AuthDynamicFeature;
@@ -8,37 +15,30 @@ import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-
-import javax.ws.rs.client.Client;
-
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.java.demo.basicauth.AppAuthenticator;
-import com.java.demo.basicauth.AppAuthorizer;
-import com.java.demo.basicauth.User;
-import com.java.demo.controller.EmployeeRESTController;
-import com.java.demo.controller.RESTClientController;
-import com.java.demo.healthcheck.AppHealthCheck;
-import com.java.demo.healthcheck.HealthCheckController;
+import javax.ws.rs.client.Client;
 
-public class App extends Application<Configuration> {
+import com.java.demo.ServiceConfiguration;
+
+public class App extends Application<ServiceConfiguration> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
 	@Override
-	public void initialize(Bootstrap<Configuration> b) {
+	public void initialize(Bootstrap<ServiceConfiguration> b) {
+		super.initialize(b);
 	}
 
 	@Override
-	public void run(Configuration c, Environment e) throws Exception 
+	public void run(ServiceConfiguration c, Environment e) throws Exception
 	{
 		LOGGER.info("Registering REST resources");
 		
 		e.jersey().register(new EmployeeRESTController(e.getValidator()));
 
-		final Client client = new JerseyClientBuilder(e)
-				.build("DemoRESTClient");
+		final Client client = new JerseyClientBuilder(e).build("DemoRESTClient");
 		e.jersey().register(new RESTClientController(client));
 
 		// Application health check
